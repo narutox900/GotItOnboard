@@ -1,9 +1,10 @@
 from werkzeug.security import safe_str_cmp
+from flask_restful import reqparse
 
 from user import User
 
 users = [
-    User('1', 'tung', 1234)
+    User('1', 'tung', '1234')
 ]
 
 username_mapping = {u.username: u for u in users}
