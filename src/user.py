@@ -1,6 +1,7 @@
 import sqlite3
 
 from flask_restful import reqparse, Resource
+from werkzeug.security import generate_password_hash
 
 
 class User:
@@ -65,7 +66,8 @@ class UserRegister(Resource):
         cursor = connection.cursor()
 
         query = "INSERT INTO users VALUES (NULL, ?, ?)"
-        cursor.execute(query, (data['username'], data['password']))
+        cursor.execute(
+            query, (data['username'], generate_password_hash(data['password'])))
 
         connection.commit()
         connection.close()
