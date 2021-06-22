@@ -7,12 +7,13 @@ import db
 
 
 class ItemModel():
-    def __init__(self, name, price):
+    def __init__(self, _id, name, price):
+        self.id = _id
         self.name = name
         self.price = price
 
     def json(self):
-        return {'name': self.name, 'price': self.price}
+        return {'id': self.id, 'name': self.name, 'price': self.price}
 
     @classmethod
     def find_by_name(cls, name):
@@ -31,10 +32,10 @@ class ItemModel():
 
     def insert(self):
         cursor = db.get_db()
-
-        query = "INSERT INTO items VALUES (?, ?)"
-        cursor.execute(query, (self.name, self.price))
+        query = "INSERT INTO items VALUES (NULL, ?, ?)"
+        lastid = cursor.execute(query, (self.name, self.price)).lastrowid
         cursor.commit()
+        return lastid
 
     def update(self):
         cursor = db.get_db()
@@ -42,3 +43,21 @@ class ItemModel():
         query = "UPDATE items SET price = ? WHERE name = ?"
         cursor.execute(query, (self.price, self.name))
         cursor.commit()
+    
+    @classmethod
+    def delete(cls, name):
+        cursor = db.get_db()
+
+        query = "DELETE FROM items WHERE name = ?"
+        cursor.execute(query, (name,))
+        cursor.commit()
+    
+    
+    @staticmethod
+    def get():
+        cursor = db.get_db()
+
+        query = "SELECT * FROM items"
+        result = cursor.execute(query)
+        return result
+
