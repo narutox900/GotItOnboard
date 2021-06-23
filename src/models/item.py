@@ -1,8 +1,3 @@
-from os import name
-import sqlite3
-
-from flask import jsonify
-
 import db
 
 
@@ -43,7 +38,7 @@ class ItemModel():
         query = "UPDATE items SET price = ? WHERE name = ?"
         cursor.execute(query, (self.price, self.name))
         cursor.commit()
-    
+
     @classmethod
     def delete(cls, name):
         cursor = db.get_db()
@@ -51,8 +46,7 @@ class ItemModel():
         query = "DELETE FROM items WHERE name = ?"
         cursor.execute(query, (name,))
         cursor.commit()
-    
-    
+
     @staticmethod
     def get():
         cursor = db.get_db()
@@ -60,4 +54,3 @@ class ItemModel():
         query = "SELECT * FROM items"
         result = cursor.execute(query)
         return result
-

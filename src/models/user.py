@@ -1,4 +1,5 @@
-import sqlite3
+from werkzeug.security import generate_password_hash
+
 import db
 
 
@@ -35,3 +36,11 @@ class UserModel:
             user = None
 
         return user
+
+    def register(self):
+        cursor = db.get_db()
+        query = "INSERT INTO users VALUES (NULL, ?, ?)"
+        cursor.execute(
+            query, (self.username, generate_password_hash(self.password)))
+
+        cursor.commit()        
