@@ -10,7 +10,7 @@ class Item(Resource):
     parser.add_argument('price',
                         type=float,
                         required=True,
-                        help="This field can not be blank!"
+                        help='This field can not be blank!'
                         )
 
     def get(self, name):
@@ -25,26 +25,25 @@ class Item(Resource):
     def post(self, name):
 
         if ItemModel.find_by_name(name):
-            return {'message': f"An item with name '{name} already exists"}, 400
+            return {'message': f'An item with name: {name} already exists'}, 400
 
         data = Item.parser.parse_args()
         new_item = ItemModel(None, name, data['price'])
         try:
             new_item.id = new_item.insert()
-        except Exception as e:
-            print(e)
-            return {"message": "An error occured inserting the item"}, 401
+        except:
+            return {'message': 'An error occured inserting the item'}, 401
 
         return new_item.json(), 201
 
     @jwt_required()
     def delete(self, name):
         if not ItemModel.find_by_name(name):
-            return {'message': f"No item with name {name} exists"}, 400
+            return {'message': f'No item with name {name} exists'}, 400
 
         ItemModel.delete(name)
 
-        return {'message': f"Item {name} deleted"}, 200
+        return {'message': f'Item {name} deleted'}, 200
 
     @jwt_required()
     def put(self, name):

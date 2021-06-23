@@ -13,7 +13,7 @@ class UserModel:
     def find_by_username(cls, username):
         cursor = db.get_db()
 
-        query = "SELECT * FROM users WHERE username = ?"
+        query = 'SELECT * FROM users WHERE username = ?'
         result = cursor.execute(query, (username,))
         row = result.fetchone()
         if row:
@@ -27,7 +27,7 @@ class UserModel:
     def find_by_id(cls, _id):
         cursor = db.get_db()
 
-        query = "SELECT * FROM users WHERE id = ?"
+        query = 'SELECT * FROM users WHERE id = ?'
         result = cursor.execute(query, (_id,))
         row = result.fetchone()
         if row:
@@ -39,7 +39,7 @@ class UserModel:
 
     def register(self):
         cursor = db.get_db()
-        query = "INSERT INTO users VALUES (NULL, ?, ?)"
+        query = 'INSERT INTO users VALUES (NULL, ?, ?)'
         cursor.execute(
             query, (self.username, generate_password_hash(self.password)))
 

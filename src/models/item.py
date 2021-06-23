@@ -14,20 +14,18 @@ class ItemModel():
     def find_by_name(cls, name):
         cursor = db.get_db()
 
-        query = "SELECT * FROM items WHERE name = ?"
+        query = 'SELECT * FROM items WHERE name = ?'
         result = cursor.execute(query, (name,))
         row = result.fetchone()
 
         if row:
-            print("found something")
             return cls(*row)
 
-        print("nothing found")
         return None
 
     def insert(self):
         cursor = db.get_db()
-        query = "INSERT INTO items VALUES (NULL, ?, ?)"
+        query = 'INSERT INTO items VALUES (NULL, ?, ?)'
         lastid = cursor.execute(query, (self.name, self.price)).lastrowid
         cursor.commit()
         return lastid
@@ -35,7 +33,7 @@ class ItemModel():
     def update(self):
         cursor = db.get_db()
 
-        query = "UPDATE items SET price = ? WHERE name = ?"
+        query = 'UPDATE items SET price = ? WHERE name = ?'
         cursor.execute(query, (self.price, self.name))
         cursor.commit()
 
@@ -43,7 +41,7 @@ class ItemModel():
     def delete(cls, name):
         cursor = db.get_db()
 
-        query = "DELETE FROM items WHERE name = ?"
+        query = 'DELETE FROM items WHERE name = ?'
         cursor.execute(query, (name,))
         cursor.commit()
 
@@ -51,6 +49,6 @@ class ItemModel():
     def get():
         cursor = db.get_db()
 
-        query = "SELECT * FROM items"
+        query = 'SELECT * FROM items'
         result = cursor.execute(query)
         return result
