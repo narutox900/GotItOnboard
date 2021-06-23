@@ -1,54 +1,37 @@
-import db
+from db import db
 
 
-class ItemModel():
-    def __init__(self, _id, name, price):
+class ItemModel(db.Model):
+    __tablename__ = 'items'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80))
+    price = db.Column(db.Float(precision=2))
+    store_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
+    store = db.relationship('StoreModel')
+
+    def __init__(self, _id, name, price, store_id):
         self.id = _id
         self.name = name
         self.price = price
+        self.store_id = store_id
 
     def json(self):
-        return {'id': self.id, 'name': self.name, 'price': self.price}
+        return {'id': self.id, 'name': self.name, 'price': self.price, 'store_id': self.store_id}
 
     @classmethod
     def find_by_name(cls, name):
-        cursor = db.get_db()
+        return cls.query.filter_by(name=name).first() # SELECT * FROM items WHERE name=name LIMIT 1
 
-        query = 'SELECT * FROM items WHERE name = ?'
-        result = cursor.execute(query, (name,))
-        row = result.fetchone()
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit() 
 
-        if row:
-            return cls(*row)
-
-        return None
-
-    def insert(self):
-        cursor = db.get_db()
-        query = 'INSERT INTO items VALUES (NULL, ?, ?)'
-        lastid = cursor.execute(query, (self.name, self.price)).lastrowid
-        cursor.commit()
-        return lastid
-
-    def update(self):
-        cursor = db.get_db()
-
-        query = 'UPDATE items SET price = ? WHERE name = ?'
-        cursor.execute(query, (self.price, self.name))
-        cursor.commit()
-
-    @classmethod
-    def delete(cls, name):
-        cursor = db.get_db()
-
-        query = 'DELETE FROM items WHERE name = ?'
-        cursor.execute(query, (name,))
-        cursor.commit()
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
 
     @staticmethod
     def get():
-        cursor = db.get_db()
-
-        query = 'SELECT * FROM items'
-        result = cursor.execute(query)
-        return result
+        return {'items': [item.json() for item in ItemModel.query.all()]}
+        # return {'items': list(map(lambda x: x.json(), ItemModel.query.all()))}

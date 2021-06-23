@@ -22,7 +22,7 @@ class UserRegister(Resource):
         if UserModel.find_by_username(data['username']):
             return {'message': 'Username already existed!'}, 400
 
-        user = UserModel(None, data['username'], data['password'])
-        user.register()
+        user = UserModel(data['username'], data['password'])
+        user.save_to_db()
 
         return {'message': 'User created succefully'}, 201

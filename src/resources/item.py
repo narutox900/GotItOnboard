@@ -12,6 +12,12 @@ class Item(Resource):
                         required=True,
                         help='This field can not be blank!'
                         )
+    parser.add_argument('store_id',
+                        type=float,
+                        required=True,
+                        help='This field can not be blank!'
+                        )
+
 
     def get(self, name):
         row = ItemModel.find_by_name(name)
@@ -28,9 +34,9 @@ class Item(Resource):
             return {'message': f'An item with name: {name} already exists'}, 400
 
         data = Item.parser.parse_args()
-        new_item = ItemModel(None, name, data['price'])
+        new_item = ItemModel(None, name, data['price'], data['store_id'])
         try:
-            new_item.id = new_item.insert()
+            new_item.save_to_db()
         except:
             return {'message': 'An error occured inserting the item'}, 401
 
@@ -38,10 +44,11 @@ class Item(Resource):
 
     @jwt_required()
     def delete(self, name):
-        if not ItemModel.find_by_name(name):
+        item = ItemModel.find_by_name(name)
+        if not item:
             return {'message': f'No item with name {name} exists'}, 400
 
-        ItemModel.delete(name)
+        item.delete_from_db()
 
         return {'message': f'Item {name} deleted'}, 200
 
@@ -50,30 +57,30 @@ class Item(Resource):
 
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(name)
-        updated_item = ItemModel(None, name, data['price'])
+        # updated_item = ItemModel(None, name, data['price'])
 
         if item:
             try:
-                updated_item.id = item.id
-                updated_item.update()
+                item.price = data['price']
+                item.store_id = data['store_id']
             except:
                 return {'message': 'An error occured updating the item'}
 
         else:
             try:
-                updated_item.id = updated_item.insert()
+                item = ItemModel(None, name, data['price'], data['store_id'])
             except:
                 return {'message': 'An error occured inserting the item'}
 
-        return updated_item.json()
+        item.save_to_db()
+
+        return item.json()
 
 
 class ItemList(Resource):
     def get(self):
-        result = ItemModel.get()
+        try:
+            return ItemModel.get()
+        except Exception as e:
+            print(e)
 
-        items = []
-        for row in result:
-            items.append({'id': row[0], 'name': row[1], 'price': row[2]})
-
-        return {'items': items}
