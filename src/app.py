@@ -1,13 +1,14 @@
 import os
 
 from flask import Flask, app
+from flask.json import jsonify
 from flask_restful import Api
-from flask_jwt import JWT
+from flask_jwt_extended import JWTManager
 
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
-from resources.user import UserRegister
-from security import authenticate, identity
+from resources.user import UserRegister, UserLogin
+from security import Security
 
 # if __name__ == '__main__':
 #     app.run(port=5000, host='0.0.0.0', debug=True)
@@ -39,7 +40,16 @@ def create_app(test_config=None):
     def create_tables():
         db.create_all()
 
-    jwt = JWT(app, authenticate, identity)  # /auth
+    # jwt = JWT(app, authenticate, identity)  # /auth
+    jwt = JWTManager(app)
+
+    @jwt.unauthorized_loader
+    @jwt.invalid_token_loader
+    @jwt.expired_token_loader
+    def my_invalid_token_callback(expired_token):
+        return jsonify({'message': 'custom message go here'})
+
+    api.add_resource(UserLogin, '/auth')
     api.add_resource(Item, '/items/<string:name>')
     api.add_resource(ItemList, '/items')
     api.add_resource(Store, '/stores/<string:name>')
