@@ -1,3 +1,5 @@
+import logging
+
 from db import db
 
 
@@ -21,17 +23,27 @@ class ItemModel(db.Model):
 
     @classmethod
     def find_by_name(cls, name):
-        return cls.query.filter_by(name=name).first() # SELECT * FROM items WHERE name=name LIMIT 1
+        # SELECT * FROM items WHERE name=name LIMIT 1
+        return cls.query.filter_by(name=name).all()
+
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
 
     def save_to_db(self):
-        db.session.add(self)
-        db.session.commit() 
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except Exception as e:
+            logging.exception(e)
 
     def delete_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except Exception as e:
+            logging.exception(e)
 
     @staticmethod
-    def get():
+    def get_all():
         return {'items': [item.json() for item in ItemModel.query.all()]}
-        # return {'items': list(map(lambda x: x.json(), ItemModel.query.all()))}

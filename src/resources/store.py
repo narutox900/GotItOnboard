@@ -1,13 +1,20 @@
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
+from flask_jwt_extended import jwt_required
 
 from models.store import StoreModel
 
 
 class Store(Resource):
 
-    def get(self, name):
-        row = StoreModel.find_by_name(name)
+    parser = reqparse.RequestParser()
+    parser.add_argument('name',
+                        type=str,
+                        required=True,
+                        help='This field can not be blank!'
+                        )
+
+    def get(self, _id):
+        row = StoreModel.find_by_id(_id)
 
         if row:
             return row.json()
@@ -15,30 +22,28 @@ class Store(Resource):
         return {'message': 'Store not found'}, 404
 
     @jwt_required()
-    def post(self, name):
-        if StoreModel.find_by_name(name):
-            return {'message': f'A store with name: {name} already exists'}, 400
-
-        new_item = StoreModel(name)
-        try:
-            new_item.save_to_db()
-        except:
-            return {'message': 'An error occured inserting the item'}, 500
-
-        return new_item.json(), 201
-
-    @jwt_required()
-    def delete(self, name):
-        store = StoreModel.find_by_name(name)
+    def delete(self, _id):
+        store = StoreModel.find_by_id(_id)
         if not store:
-            return {'message': f'No store with name {name} exists'}, 400
+            return {'message': f'No store with id {_id} exists'}, 400
 
         store.delete_from_db()
 
-        return {'message': f'Store {name} deleted'}, 200
+        return {'message': f'Store {_id} deleted'}, 200
+
 
 class StoreList(Resource):
-    @staticmethod
-    def get():
-        # return {'items': [item.json() for item in ItemModel.query.all()]}
-        return {'stores': list(map(lambda x: x.json(), StoreModel.query.all()))}
+    def get(self):
+        return StoreModel.get_all()
+
+    @jwt_required()
+    def post(self):
+        data = Store.parser.parse_args()
+
+        if StoreModel.find_by_name(data['name']):
+            return {'message': f'A store with name: {data["name"]} already exists'}, 400
+
+        new_item = StoreModel(data["name"])
+        new_item.save_to_db()
+
+        return new_item.json(), 201

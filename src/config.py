@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Config:
     """Base config."""
     SECRET_KEY = os.getenv('SECRET_KEY')
